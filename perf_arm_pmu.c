@@ -60,7 +60,7 @@ main(int ac, char **av)
 	disable_pmu0(0x008);
 	disable_pmu1(0x013);
         printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x008, cnt_end0 - cnt_start0);
-        printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x008, cnt_end1 - cnt_start1);
+        printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x013, cnt_end1 - cnt_start1);
 
         free(a); free(b);
         return 0;
