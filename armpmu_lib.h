@@ -27,7 +27,7 @@ rdtsc32(void)
 #define ARMV8_PMEVTYPER_EVTCOUNT_MASK  0x3ff
 
 static inline void
-enable_pmu(uint32_t evtCount)
+enable_pmu0(uint32_t evtCount)
 {
 #if defined(__GNUC__) && defined __aarch64__
 	evtCount &= ARMV8_PMEVTYPER_EVTCOUNT_MASK;
@@ -45,7 +45,7 @@ enable_pmu(uint32_t evtCount)
 }
 
 static inline uint32_t
-read_pmu(void)
+read_pmu0(void)
 {
 #if defined(__GNUC__) && defined __aarch64__
         uint32_t r = 0;
@@ -57,7 +57,7 @@ read_pmu(void)
 }
 
 static inline void
-disable_pmu(uint32_t evtCount)
+disable_pmu0(uint32_t evtCount)
 {
 #if defined(__GNUC__) && defined __aarch64__
 	/*   Performance Monitors Count Enable Set register: clear bit 0 */
@@ -70,5 +70,48 @@ disable_pmu(uint32_t evtCount)
 #endif
 }
 
+static inline void
+enable_pmu1(uint32_t evtCount)
+{
+#if defined(__GNUC__) && defined __aarch64__
+	evtCount &= ARMV8_PMEVTYPER_EVTCOUNT_MASK;
+	asm volatile("isb");
+	/* Just use counter 0 */
+	asm volatile("msr pmevtyper1_el0, %0" : : "r" (evtCount));
+	/*   Performance Monitors Count Enable Set register bit 30:1 disable, 31,1 enable */
+	uint32_t r = 0;
+
+	asm volatile("mrs %0, pmcntenset_el0" : "=r" (r));
+	asm volatile("msr pmcntenset_el0, %0" : : "r" (r| (1 << 1)));
+#else
+#error Unsupported architecture/compiler!
+#endif
+}
+
+static inline uint32_t
+read_pmu1(void)
+{
+#if defined(__GNUC__) && defined __aarch64__
+        uint32_t r = 0;
+	asm volatile("mrs %0, pmevcntr1_el0" : "=r" (r)); 
+	return r;
+#else
+#error Unsupported architecture/compiler!
+#endif
+}
+
+static inline void
+disable_pmu1(uint32_t evtCount)
+{
+#if defined(__GNUC__) && defined __aarch64__
+	/*   Performance Monitors Count Enable Set register: clear bit 0 */
+	uint32_t r = 0;
+
+	asm volatile("mrs %0, pmcntenset_el0" : "=r" (r));
+	asm volatile("msr pmcntenset_el0, %0" : : "r" (r&&0xfffffffd));
+#else
+#error Unsupported architecture/compiler!
+#endif
+}
 
 #endif /* ARMPMU_LIB_H */

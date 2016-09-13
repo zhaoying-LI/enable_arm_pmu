@@ -21,8 +21,10 @@ main(int ac, char **av)
 {
         uint32_t time_start = 0;
         uint32_t time_end   = 0;
-	uint32_t cnt_start = 0;
-	uint32_t cnt_end = 0;
+	uint32_t cnt_start0 = 0;
+	uint32_t cnt_end0 = 0;
+	uint32_t cnt_start1 = 0;
+	uint32_t cnt_end1 = 0;
 
         int *a  = NULL;
         int *b  = NULL;
@@ -48,12 +50,17 @@ main(int ac, char **av)
         printf("%s: done. sum = %d; time delta = %u\n", av[0], sum, time_end - time_start);
 
         printf("%s: beginning loop\n", av[0]);
-	enable_pmu(0x008);
-        cnt_start = read_pmu();
+	enable_pmu0(0x008);
+	enable_pmu1(0x013);
+        cnt_start0 = read_pmu0();
+        cnt_start1 = read_pmu1();
         sum = loop(a, b, len);
-        cnt_end   = read_pmu();
-	disable_pmu(0x008);
-        printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x008, cnt_end - cnt_start);
+        cnt_end0   = read_pmu0();
+        cnt_end1   = read_pmu1();
+	disable_pmu0(0x008);
+	disable_pmu1(0x013);
+        printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x008, cnt_end0 - cnt_start0);
+        printf("%s: done. sum = %d; event 0x%03x delta = %u\n", av[0], sum, 0x008, cnt_end1 - cnt_start1);
 
         free(a); free(b);
         return 0;
