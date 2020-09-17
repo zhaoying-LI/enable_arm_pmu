@@ -1,6 +1,7 @@
 #ifndef ARMPMU_LIB_H
 #define ARMPMU_LIB_H
 
+#include <stdint.h>
 static inline uint32_t
 rdtsc32(void)
 {
